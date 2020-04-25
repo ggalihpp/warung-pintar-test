@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>WebSocket</title>
+</head>
+
+<body>
+    <h1>MESSAGE</h1>
+    <p id="output"></p>
+
+    <script>
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "messages/", true);
+        xhr.send();
+
+        xhr.onreadystatechange = processRequest;
+
+        function processRequest(e) {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log("REQUEST DONE")
+                console.log(xhr)
+                let data = JSON.parse(xhr.response)
+                console.log(data)
+
+                var out = document.getElementById('output');
+
+                for (i = data.length - 1; i >= 0; i--) {
+                    out.innerHTML += `${data[i].username}: ${data[i].message}` + '<br>';
+                }
+
+            }
+        }
+    </script>
+
+    <script>
+        var loc = window.location;
+        var uri = 'ws:';
+
+        if (loc.protocol === 'https:') {
+            uri = 'wss:';
+        }
+        uri += '//' + loc.host;
+        uri += loc.pathname + 'messages/ws/ggalihpp';
+
+        ws = new WebSocket(uri)
+
+        ws.onopen = function () {
+            console.log('Connected')
+        }
+
+        ws.onmessage = function (evt) {
+            let obj = JSON.parse(evt.data);
+            var out = document.getElementById('output');
+            out.innerHTML += `${obj.From}: ${obj.Message}` + '<br>';
+        }
+    </script>
+</body>
+
+</html>

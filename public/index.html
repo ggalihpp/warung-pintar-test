@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" const="text/html;charset=UTF-8" />
+    <link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet" type="text/css">
+    <style>
+        @mixin vertical-align {
+            position: relative;
+            top: 50%;
+            -webkit-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            margin: 0px;
+            height: 100%;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Comfortaa', sans-serif;
+            margin: 0px;
+        }
+
+        div#change_username,
+        section#input_zone {
+            border: 5px outset #320AAA;
+        }
+
+        div#change_username {
+            height: 3%;
+            display: inline-block;
+            background-color: #BCA9F5;
+        }
+
+        section#chatroom {
+            border: 5px inset #0B002B;
+            height: 85%;
+            overflow: auto;
+        }
+
+        section#input_zone {
+            height: 7%;
+            text-align: center;
+            background-color: #BCA9F5;
+        }
+
+        .vertical-align {
+            position: relative;
+            top: 50%;
+            -webkit-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+
+        input#username {
+            font-family: 'Comfortaa', sans-serif;
+        }
+
+        input#message {
+            display: inline-block;
+            width: 88%;
+            height: 70%;
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 2vh;
+        }
+
+        button#send_message {
+            display: inline-block;
+            height: 70%;
+            width: 10%;
+        }
+
+        p.message {
+            margin: 0px;
+            width: 100%;
+            height: 40px;
+            font-size: 2vh;
+            font-family: 'Comfortaa', sans-serif;
+            padding: 1vh;
+        }
+
+        .message:nth-child(even) {
+            background-color: #81DAF5;
+        }
+
+        .message:nth-child(odd) {
+            background-color: #81BEF7;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+    <title>Simple Chat App</title>
+</head>
+
+<body>
+    <header>
+        <h1>g9</h1>
+    </header>
+
+    <section id="username">
+    </section>
+
+    <section id="chatroom">
+        <section id="feedback"></section>
+    </section>
+
+    <section id="input_zone">
+        <input id="message" class="vertical-align" type="text" />
+        <button id="send_message" class="vertical-align" type="button">Send</button>
+    </section>
+
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+
+    <script>
+        var username = prompt("Please enter your username", "guest");
+
+        if (username == null || username == "") {
+            username = "guest";
+            localStorage.setItem("username", "guest");
+        } else {
+            localStorage.setItem("username", username);
+        }
+
+        var usernameSection = $("#username");
+
+        usernameSection.append(`<p>Hello, ${username} :)</p>`);
+
+    </script>
+
+    <script>
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "messages/", true);
+        xhr.send();
+
+        xhr.onreadystatechange = processRequest;
+
+        function processRequest(e) {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                let data = JSON.parse(xhr.response)
+                var chatroom = $("#chatroom");
+
+                for (i = data.length - 1; i >= 0; i--) {
+                    chatroom.append("<p class='message'>" + data[i].username + ": " + data[i].message + "</p>");
+                }
+
+            }
+        }
+    </script>
+
+    <script>
+        var loc = window.location;
+        var uri = 'ws:';
+
+        if (loc.protocol === 'https:') {
+            uri = 'wss:';
+        }
+        uri += '//' + loc.host;
+        uri += loc.pathname + 'messages/ws/' + username;
+
+        ws = new WebSocket(uri)
+
+        ws.onopen = function () {
+            console.log('Connected')
+        }
+
+        $(function () {
+            // buttons and inputs
+            var message = $("#message");
+            var username = $("#username");
+            var send_message = $("#send_message");
+            var send_username = $("#send_username");
+            var chatroom = $("#chatroom");
+
+            ws.onmessage = function (evt) {
+                let obj = JSON.parse(evt.data);
+                var out = document.getElementById('output');
+                chatroom.append("<p class='message'>" + obj.From + ": " + obj.Message + "</p>");
+            }
+
+            // emit a message
+            send_message.click(function () {
+                var xhrPostMessage = new XMLHttpRequest();
+                xhrPostMessage.open('POST', "messages/", true);
+                xhrPostMessage.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhrPostMessage.send(JSON.stringify({
+                    "message": message.val(),
+                    "username": localStorage.getItem("username")
+                }));
+
+                xhrPostMessage.onreadystatechange = processRequest;
+            })
+        })
+    </script>
+</body>
+
+</html>
