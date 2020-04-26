@@ -1,5 +1,19 @@
 # Guidelines
 
+## Docker
+
+The Dockerfile is available to create a container, run `docker build` command
+
+```
+docker build -t warung-pintar-test:0.1 .
+```
+
+run the container
+
+```
+docker run -d -p 3000:3000 warung-pintar-test:0.1
+```
+
 ## Prerequisites
 
 Golang version 1.11.x or later that support _GO MODULES_
