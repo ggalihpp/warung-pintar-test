@@ -20,6 +20,10 @@ func sendMessage(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	if body.Username == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Username cannot be empty")
+	}
+
 	if err := repository.SendMessage(body.Username, body.Message); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -35,7 +39,7 @@ func getMessages(c echo.Context) error {
 	return c.JSON(http.StatusOK, msgs)
 }
 
-func hello(c echo.Context) error {
+func wsHandler(c echo.Context) error {
 	currentGorillaConn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

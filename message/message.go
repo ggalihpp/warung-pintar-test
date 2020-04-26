@@ -6,5 +6,5 @@ import "github.com/labstack/echo"
 func Handler(e *echo.Group) {
 	e.POST("/", sendMessage)
 	e.GET("/", getMessages)
-	e.GET("/ws/:USERNAME", hello)
+	e.GET("/ws/:USERNAME", wsHandler)
 }
